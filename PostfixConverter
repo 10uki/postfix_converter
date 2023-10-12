@@ -1,0 +1,123 @@
+package PostfixConverter;
+
+import java.util.EmptyStackException;
+
+public class PostfixConverter {
+
+	public class Stack<T> {
+		private class Node<T> {
+			private T data;
+			private Node<T> next;
+
+			public Node(T data) {
+				this.data = data;
+				this.next = null;
+			}
+		}
+
+		private Node<T> top;
+		public int size;
+
+		public Stack() {
+			top = null;
+			size = 0;
+		}
+
+		public boolean isEmpty() {
+			return (top == null);
+		}
+
+		public void push(T data) {
+			Node<T> newNode = new Node<T>(data);
+			newNode.next = top;
+			top = newNode;
+			size++;
+		}
+
+		public T pop() {
+			if (top == null) {
+				throw new EmptyStackException();
+			}
+			T data = top.data;
+			top = top.next;
+			size--;
+			return data;
+		}
+
+		public T peek() {
+			if (top == null) {
+				throw new EmptyStackException();
+			}
+			return top.data;
+		}
+	}
+
+	// Order of operators.
+	int order(char operator) {
+		switch (operator) {
+		case '+':
+		case '-':
+			return 1; // Lowest.
+		case '*':
+		case '/':
+			return 2;
+		case '^': // Highest
+			return 3;
+		default:
+			return -1; // invalid
+		}
+	}
+
+	public char[] infixToPostfix(char[] infix) {
+		// Create a character array the same length as the infix expression and then the
+		// new stack stores these characters temporarily.
+		char[] postfix = new char[infix.length];
+		int postfixIndex = 0;
+		Stack<Character> stack = new Stack<>();
+
+		for (char c : infix) {
+			// Ignore whitespace.
+			if (c == ' ') {
+				continue;
+			}
+			// If the character is an operand, append it to the postfix expression.
+			if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+				postfix[postfixIndex++] = c;
+			}
+			// If the character is an opening parenthesis, push it to the stack.
+			else if (c == '(') {
+				stack.push(c);
+			}
+			// If the character is a closing parenthesis, pop operators from the stack
+			// and append them to the postfix expression until an opening parenthesis is
+			// found.
+			else if (c == ')') {
+				while (!stack.isEmpty() && stack.peek() != '(') {
+					postfix[postfixIndex++] = stack.pop();
+				}
+				// Discard opening parenthesis.
+				if (!stack.isEmpty() && stack.peek() == '(') {
+					stack.pop();
+				} else {
+					throw new IllegalArgumentException("Error: Mismatched Parenthesis.");
+				}
+			}
+			// Pop operators from the stack pop entries from the stack of high priority.
+			else {
+				while (!stack.isEmpty() && order(c) <= order(stack.peek())) {
+					postfix[postfixIndex++] = stack.pop();
+				}
+				stack.push(c);
+			}
+		}
+		// Pop remaining operators from the stack and append them to the postfix
+		// expression.
+		while (!stack.isEmpty()) {
+			if (stack.peek() == '(') {
+				throw new IllegalArgumentException("Error: Mismatched Parenthesis.");
+			}
+			postfix[postfixIndex++] = stack.pop();
+		}
+		return postfix;
+	}
+}
