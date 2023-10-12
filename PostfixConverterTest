@@ -1,0 +1,22 @@
+package PostfixConverter;
+
+import java.util.Scanner;
+
+public class PostfixConverterTest {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter infix expression: ");
+        String infixExpression = scanner.nextLine();
+        scanner.close();
+
+        PostfixConverter converter = new PostfixConverter();
+        char[] postfixExpression = converter.infixToPostfix(infixExpression.toCharArray());
+
+        System.out.println("Postfix expression: " + new String(postfixExpression));
+    }
+}
+
+
+
+
